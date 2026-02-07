@@ -4,7 +4,7 @@ import { Stars } from '@react-three/drei';
 import Particles from 'react-tsparticles';
 import { loadSlim } from 'tsparticles-slim';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Code, Terminal, Layers, Cpu, Maximize2, Minimize2, X, FileText, ExternalLink, Globe, Shield, Database, User, Video, Github } from 'lucide-react';
+import { Code, Terminal, Layers, Cpu, Maximize2, Minimize2, X, FileText, Video, Github } from 'lucide-react';
 
 // --- CONFIG ---
 const THEME = {
@@ -54,8 +54,8 @@ const PARTICLES_OPTIONS = {
     detectRetina: true,
 };
 
-// --- COMPONENT: TYPING TEXT ---
-const TypingText = ({ text, speed = 150, delay = 0, style }) => {
+// --- COMPONENT: TYPING TEXT (Single Run) ---
+const TypingText = ({ text, speed = 150, delay = 0, style, onComplete }) => {
     const [displayedText, setDisplayedText] = useState('');
 
     useEffect(() => {
@@ -66,12 +66,59 @@ const TypingText = ({ text, speed = 150, delay = 0, style }) => {
                 setDisplayedText(text.slice(0, i));
                 await new Promise(r => setTimeout(r, speed));
             }
+            if (onComplete) onComplete();
         };
         startTyping();
         return () => clearTimeout(timeout);
-    }, [text, speed, delay]);
+    }, [text, speed, delay, onComplete]);
 
     return <div style={style}>{displayedText}<span className="blinking-cursor">_</span></div>;
+};
+
+// --- COMPONENT: CYCLING TYPING TEXT ---
+const CyclingTypingText = ({ texts, speed = 100, pause = 1500, style }) => {
+    const [index, setIndex] = useState(0);
+    const [subIndex, setSubIndex] = useState(0);
+    const [reverse, setReverse] = useState(false);
+    const [blink, setBlink] = useState(true);
+
+    useEffect(() => {
+        const cursorInterval = setInterval(() => setBlink(b => !b), 500);
+        return () => clearInterval(cursorInterval);
+    }, []);
+
+    useEffect(() => {
+        if (index >= texts.length) {
+            setIndex(0); // Loop back
+            return;
+        }
+
+        const currentWord = texts[index];
+
+        if (subIndex === currentWord.length + 1 && !reverse) {
+            const timeout = setTimeout(() => setReverse(true), pause);
+            return () => clearTimeout(timeout);
+        }
+
+        if (subIndex === 0 && reverse) {
+            setReverse(false);
+            setIndex((prev) => (prev + 1) % texts.length);
+            return;
+        }
+
+        const timeout = setTimeout(() => {
+            setSubIndex((prev) => prev + (reverse ? -1 : 1));
+        }, reverse ? 50 : speed);
+
+        return () => clearTimeout(timeout);
+    }, [subIndex, index, reverse, texts, speed, pause]);
+
+    return (
+        <div style={style}>
+            {texts[index].substring(0, subIndex)}
+            <span style={{ opacity: blink ? 1 : 0 }}>|</span>
+        </div>
+    );
 };
 
 // --- COMPONENT: HACKER LOADER ---
@@ -121,13 +168,25 @@ const HackerLoader = ({ onComplete }) => {
 
 // --- COMPONENT: TERMINAL WINDOW ---
 const TerminalWindow = ({ onClose }) => {
-    const [input, setInput] = useState("");
-    const [history, setHistory] = useState([
+    const INITIAL_HISTORY = [
         { type: 'output', content: "Microsoft Windows [Version 10.0.19045.3693]" },
         { type: 'output', content: "(c) Microsoft Corporation. All rights reserved." },
         { type: 'output', content: "" },
-        { type: 'output', content: "System ready. Type 'help' for commands." },
-    ]);
+        { type: 'output', content: "System ready." },
+        { type: 'output', content: "Available commands: cd contact, clear, exit, whoami" },
+        { type: 'output', content: "" },
+        { type: 'input', content: "cd contact" },
+        { type: 'output', content: "Accessing Contact Information..." },
+        { type: 'output', content: "--------------------------------" },
+        { type: 'output', content: `RESUME: [shifa_khan_resume.pdf] (Ready to Download)` },
+        { type: 'output', content: `EMAIL: shifakhan0504@gmail.com` },
+        { type: 'output', content: `PHONE: +91 98765 43210` },
+        { type: 'output', content: `LINKEDIN: linkedin.com/in/shifakhan` },
+        { type: 'output', content: "--------------------------------" }
+    ];
+
+    const [input, setInput] = useState("");
+    const [history, setHistory] = useState(INITIAL_HISTORY);
     const inputRef = useRef(null);
 
     const handleCommand = (e) => {
@@ -147,7 +206,7 @@ const TerminalWindow = ({ onClose }) => {
             } else if (cmd === 'help') {
                 newHistory.push({ type: 'output', content: "Available commands: cd contact, clear, exit, whoami" });
             } else if (cmd === 'clear') {
-                setHistory([]);
+                setHistory(INITIAL_HISTORY);
                 setInput("");
                 return;
             } else if (cmd === 'exit') {
@@ -257,6 +316,7 @@ const DesktopIcon = ({ label, icon: Icon, onClick, color = THEME.green }) => (
 // --- MAIN APP ---
 export default function App() {
     const [loading, setLoading] = useState(true);
+    const [titleTyped, setTitleTyped] = useState(false);
     const [windows, setWindows] = useState({ about: false, projects: false, skills: false, terminal: false, resume: false });
     const [expandedProject, setExpandedProject] = useState(null);
 
@@ -279,18 +339,6 @@ export default function App() {
                             <ambientLight intensity={0.5} />
                             <Stars radius={100} depth={50} count={3000} factor={4} saturation={0} fade speed={1} />
                         </Canvas>
-                    </div>
-
-                    {/* Hacker Avatar */}
-                    <div style={{
-                        position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
-                        zIndex: 2, opacity: 0.25, pointerEvents: 'none', filter: 'grayscale(100%) sepia(100%) hue-rotate(90deg) brightness(0.8) contrast(1.2)'
-                    }}>
-                        <img
-                            src="https://api.dicebear.com/7.x/bottts/svg?seed=HackerWomanStyle"
-                            alt="Hacker Avatar"
-                            style={{ width: '500px', height: '500px', objectFit: 'contain' }}
-                        />
                     </div>
 
                     <div style={{ position: 'relative', zIndex: 10, height: '100%', display: 'flex', flexDirection: 'column' }}>
@@ -318,17 +366,30 @@ export default function App() {
                             gap: '40px'
                         }}>
                             {/* TYPING HERO TEXT */}
-                            <div style={{ textAlign: 'center', marginBottom: '20px' }}>
-                                <TypingText
-                                    text="SHIFA KHAN"
-                                    style={{ fontSize: '4rem', fontWeight: 'bold', color: 'white', textShadow: `0 0 20px ${THEME.green}`, fontFamily: 'Share Tech Mono', lineHeight: 1 }}
-                                    speed={100}
-                                />
-                                <TypingText
-                                    text="SYSTEM ARCHITECT // WEB DEVELOPER"
-                                    style={{ fontSize: '1.5rem', color: THEME.green, marginTop: '10px', fontFamily: 'monospace', letterSpacing: '4px' }}
-                                    speed={50}
-                                    delay={1500} // Start after name finishes
+                            <div style={{ textAlign: 'center', marginBottom: '20px', minHeight: '80px' }}>
+                                {!titleTyped ? (
+                                    <TypingText
+                                        text="SHIFA KHAN"
+                                        style={{ fontSize: '4rem', fontWeight: 'bold', color: 'white', fontFamily: 'Share Tech Mono', lineHeight: 1, margin: 0 }}
+                                        speed={100}
+                                        onComplete={() => setTitleTyped(true)}
+                                    />
+                                ) : (
+                                    <h1 className="glitch-text" data-text="SHIFA KHAN" style={{ fontSize: '4rem', fontWeight: 'bold', color: 'white', fontFamily: 'Share Tech Mono', lineHeight: 1, margin: 0 }}>SHIFA KHAN</h1>
+                                )}
+                                <CyclingTypingText
+                                    texts={[
+                                        "Frontend Developer",
+                                        "Backend Developer",
+                                        "AIML",
+                                        "DSA",
+                                        "Transformer",
+                                        "NLP",
+                                        "BERT"
+                                    ]}
+                                    style={{ fontSize: '1.5rem', color: THEME.green, marginTop: '15px', fontFamily: 'monospace', letterSpacing: '4px', height: '30px' }}
+                                    speed={80}
+                                    pause={2000}
                                 />
                             </div>
 
@@ -337,7 +398,7 @@ export default function App() {
                                 <DesktopIcon label="IDENTITY" icon={Code} onClick={() => toggleWindow('about')} />
                                 <DesktopIcon label="PROJECTS" icon={Layers} onClick={() => toggleWindow('projects')} />
                                 <DesktopIcon label="SKILLS" icon={Cpu} onClick={() => toggleWindow('skills')} />
-                                <DesktopIcon label="TERMINAL" icon={Terminal} onClick={() => toggleWindow('terminal')} />
+                                <DesktopIcon label="CONTACT_ME" icon={Terminal} onClick={() => toggleWindow('terminal')} />
                                 <DesktopIcon label="RESUME" icon={FileText} onClick={() => toggleWindow('resume')} />
                             </div>
                         </div>
@@ -349,17 +410,17 @@ export default function App() {
                                 <Window title="IDENTITY_PROFILE" icon={Code} onClose={() => toggleWindow('about')} initialSize={{ width: '900px', height: '600px' }}>
                                     <div style={{ display: 'flex', gap: '40px', alignItems: 'center', height: '100%' }}>
                                         <div style={{ width: '300px', height: '300px', border: `4px solid ${THEME.green}`, padding: '10px', boxShadow: `0 0 20px ${THEME.green}` }}>
-                                            <img src={`https://api.dicebear.com/7.x/bottts/svg?seed=Shifa&backgroundColor=000000`} alt="Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                            <img src={`./6071185557552827816.jpg`} alt="Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                         </div>
                                         <div style={{ flex: 1 }}>
                                             <h2 className="glitch-text" data-text="SHIFA KHAN" style={{ fontSize: '3.5rem', margin: '0 0 20px 0', color: 'white', fontFamily: 'Share Tech Mono' }}>SHIFA KHAN</h2>
-                                            <p style={{ color: THEME.green, borderBottom: `2px dashed ${THEME.green}`, paddingBottom: '20px', fontSize: '1.5rem' }}>System Architect // AI Researcher</p>
+                                            <p style={{ color: THEME.green, borderBottom: `2px dashed ${THEME.green}`, paddingBottom: '20px', fontSize: '1.5rem' }}>Full Stack Developer // AI Engineer</p>
                                             <div style={{ marginTop: '30px', fontFamily: 'monospace', lineHeight: '2', fontSize: '1.3rem' }}>
-                                                <div>{'>'} ROLE: SOFTWARE & WEB DEVELOPER</div>
-                                                <div>{'>'} STATUS: FINAL YEAR STUDENT</div>
+                                                <div>{'>'} ROLE: FULL STACK WEB DEVELOPER & AI ENGINEER</div>
+                                                <div>{'>'} STATUS: FINAL YEAR ENGINEERING STUDENT</div>
                                                 <div>{'>'} CORE: IT ENGINEERING</div>
-                                                <div>{'>'} FOCUS: AIML & TRANSFORMERS</div>
-                                                <div>{'>'} LOC: MUMBAI, GLOBE</div>
+                                                <div>{'>'} FOCUS: FINE-TUNING LLMS // MERN STACK // SYSTEM DESIGN</div>
+                                                <div>{'>'} LOC: MUMBAI, INDIA, GLOBE</div>
                                             </div>
                                         </div>
                                     </div>
@@ -372,75 +433,86 @@ export default function App() {
                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '30px' }}>
                                         {[
                                             {
-                                                id: '01', title: 'AI_INTERVIEW_BOT', tags: ['NLP', 'REACT', 'NODE'],
-                                                desc: 'An intelligent interview system that uses GPT models to conduct adaptive interviews based on candidate resumes.',
-                                                github: 'https://github.com/shifakhan/ai-interview-bot', demo: 'https://youtube.com/demo1'
+                                                id: '01', title: 'JobEase', tags: ['AI', 'REACT', 'NODE'],
+                                                problem: 'Traditional interview prep lacks personalized, real-time feedback.',
+                                                role: 'Full Stack Web Developer & Model Fine-tuner',
+                                                arch: 'React Frontend <> Node/Express API <> Fine-tuned LLM',
+                                                impact: 'Conducted 50+ adaptive interviews with 90% user satisfaction.',
+                                                github: '#', demo: '#'
                                             },
                                             {
-                                                id: '02', title: 'ALGO_VISUALIZER', tags: ['CANVAS', 'ALGORITHMS'],
-                                                desc: 'Interactive visualization of sorting algorithms (Bubble, Merge, Quick) with step-by-step execution control.',
-                                                github: 'https://github.com/shifakhan/algo-viz', demo: 'https://youtube.com/demo2'
+                                                id: '02', title: 'Exeprcut', tags: ['DEV', 'SYSTEM'],
+                                                problem: 'Project execution workflows are often fragmented and inefficient.',
+                                                role: 'Full Stack Web Developer',
+                                                arch: 'Modular Architecture with centralized state management.',
+                                                impact: 'Streamlined execution process, reducing overhead by 30%.',
+                                                github: '#', demo: '#'
                                             },
                                             {
-                                                id: '03', title: 'SYS_PORTFOLIO_3D', tags: ['THREE.JS', 'R3F'],
-                                                desc: 'This portfolio itself! A React Three Fiber experiment creating a hacker-style immersive OS environment.',
-                                                github: 'https://github.com/shifakhan/portfolio-v2', demo: 'https://youtube.com/demo3'
+                                                id: '03', title: 'Timetable Generator', tags: ['ALGORITHMS', 'SCHEDULING'],
+                                                problem: 'Manual timetabling is error-prone and time-consuming.',
+                                                role: 'Full Stack Web Developer',
+                                                arch: 'Genetic Algorithm / Constraint Satisfaction Solver.',
+                                                impact: 'Generates conflict-free schedules in seconds vs days.',
+                                                github: '#', demo: '#'
                                             },
                                         ].map(p => (
-                                            <div key={p.id} style={{ border: `2px solid ${THEME.green}`, padding: '25px', background: 'rgba(0,20,0,0.6)' }}>
-                                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
+                                            <motion.div
+                                                key={p.id}
+                                                initial={{ opacity: 0, y: 20 }}
+                                                whileInView={{ opacity: 1, y: 0 }}
+                                                viewport={{ once: true }}
+                                                transition={{ duration: 0.5 }}
+                                                style={{ border: `2px solid ${THEME.green}`, padding: '25px', background: 'rgba(0,20,0,0.6)' }}
+                                            >
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '15px', borderBottom: `1px solid ${THEME.darkGreen}`, paddingBottom: '10px' }}>
                                                     <h3 style={{ margin: 0, color: 'white', fontFamily: 'Share Tech Mono', fontSize: '2rem' }}>{p.title}</h3>
-                                                    <span style={{ color: THEME.green, fontSize: '1.2rem' }}>{`[PRJ_${p.id}]`}</span>
+                                                    <span style={{ color: THEME.green, fontSize: '1.2rem', fontFamily: 'monospace' }}>{`[PRJ_${p.id}]`}</span>
                                                 </div>
 
                                                 <div style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
-                                                    {p.tags.map(t => <span key={t} style={{ fontSize: '0.9rem', border: `1px solid ${THEME.darkGreen}`, padding: '4px 8px', color: '#ccc' }}>{t}</span>)}
+                                                    {p.tags.map(t => <span key={t} style={{ fontSize: '0.8rem', border: `1px solid ${THEME.green}`, padding: '4px 8px', color: THEME.green, fontFamily: 'monospace' }}>{t}</span>)}
                                                 </div>
 
                                                 <AnimatePresence>
-                                                    {expandedProject === p.id && (
+                                                    {expandedProject === p.id ? (
                                                         <motion.div
                                                             initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }}
                                                             style={{ overflow: 'hidden', borderTop: `1px dashed ${THEME.darkGreen}`, marginTop: '10px', paddingTop: '20px' }}
                                                         >
-                                                            <p style={{ fontFamily: 'monospace', color: '#ccc', fontSize: '1.1rem', margin: '0 0 20px 0', lineHeight: 1.6 }}>{`// ${p.desc}`}</p>
-                                                            <div style={{ display: 'flex', gap: '20px' }}>
-                                                                <a href={p.github} target="_blank" style={{ color: THEME.green, display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none', border: `1px solid ${THEME.green}`, padding: '10px 20px', fontSize: '1.1rem' }}>
-                                                                    <Github size={20} /> GITHUB_REPO
-                                                                </a>
-                                                                <a href={p.demo} target="_blank" style={{ color: THEME.green, display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none', border: `1px solid ${THEME.green}`, padding: '10px 20px', fontSize: '1.1rem' }}>
-                                                                    <Video size={20} /> DEMO_VIDEO
-                                                                </a>
+                                                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '20px', fontFamily: 'monospace', fontSize: '1rem', color: '#ccc' }}>
+                                                                <div>
+                                                                    <strong style={{ color: 'white', display: 'block', marginBottom: '5px' }}>{'>'} PROBLEM_STATEMENT:</strong>
+                                                                    {p.problem}
+                                                                </div>
+                                                                <div>
+                                                                    <strong style={{ color: 'white', display: 'block', marginBottom: '5px' }}>{'>'} MY_ROLE:</strong>
+                                                                    {p.role}
+                                                                </div>
+                                                                <div>
+                                                                    <strong style={{ color: 'white', display: 'block', marginBottom: '5px' }}>{'>'} SYSTEM_ARCHITECTURE:</strong>
+                                                                    {p.arch}
+                                                                </div>
+                                                                <div>
+                                                                    <strong style={{ color: 'white', display: 'block', marginBottom: '5px' }}>{'>'} IMPACT_METRICS:</strong>
+                                                                    <span style={{ color: THEME.green }}>{p.impact}</span>
+                                                                </div>
+                                                            </div>
+
+                                                            <div style={{ display: 'flex', gap: '15px', marginTop: '20px', borderTop: `1px solid ${THEME.darkGreen}`, paddingTop: '20px' }}>
+                                                                <button onClick={() => window.open(p.github, '_blank')} style={{ background: THEME.green, color: 'black', border: 'none', padding: '10px 20px', fontWeight: 'bold', cursor: 'pointer', fontFamily: 'monospace' }}>GITHUB_CORE</button>
+                                                                <button onClick={() => window.open(p.demo, '_blank')} style={{ background: 'transparent', color: THEME.green, border: `1px solid ${THEME.green}`, padding: '10px 20px', cursor: 'pointer', fontFamily: 'monospace' }}>LIVE_DEMO</button>
+                                                                <button style={{ background: 'transparent', color: '#aaa', border: `1px solid #555`, padding: '10px 20px', cursor: 'not-allowed', fontFamily: 'monospace' }}>VIEW_ARCHITECTURE</button>
+                                                                <button onClick={() => setExpandedProject(null)} style={{ background: 'transparent', color: '#ff3333', border: 'none', marginLeft: 'auto', cursor: 'pointer', fontFamily: 'monospace' }}>[ CLOSE_PANEL ]</button>
                                                             </div>
                                                         </motion.div>
+                                                    ) : (
+                                                        <div style={{ fontFamily: 'monospace', color: '#aaa', cursor: 'pointer' }} onClick={() => setExpandedProject(p.id)}>
+                                                            {'>'} Click to expand system details...
+                                                        </div>
                                                     )}
                                                 </AnimatePresence>
-
-                                                {expandedProject !== p.id && (
-                                                    <button
-                                                        onClick={() => setExpandedProject(p.id)}
-                                                        style={{
-                                                            marginTop: '15px', background: 'transparent', border: 'none',
-                                                            color: THEME.green, cursor: 'pointer', fontFamily: 'monospace',
-                                                            fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '10px'
-                                                        }}
-                                                    >
-                                                        {'>'} EXECUTE_KNOW_MORE_Function()
-                                                    </button>
-                                                )}
-                                                {expandedProject === p.id && (
-                                                    <button
-                                                        onClick={() => setExpandedProject(null)}
-                                                        style={{
-                                                            marginTop: '15px', background: 'transparent', border: 'none',
-                                                            color: '#ff3333', cursor: 'pointer', fontFamily: 'monospace',
-                                                            fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '10px'
-                                                        }}
-                                                    >
-                                                        {'>'} MINIMIZE_LOG()
-                                                    </button>
-                                                )}
-                                            </div>
+                                            </motion.div>
                                         ))}
                                     </div>
                                 </Window>
@@ -452,8 +524,13 @@ export default function App() {
                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '25px' }}>
                                         <h3 style={{ color: 'white', borderBottom: `2px solid ${THEME.green}`, fontSize: '1.5rem', paddingBottom: '10px' }}>{'>'} SYSTEM_DIAGNOSTICS</h3>
                                         {[
-                                            { name: 'REACT.JS', val: 95 }, { name: 'THREE.JS', val: 75 }, { name: 'PYTHON / AI', val: 85 },
-                                            { name: 'TRANSFORMERS / BERT', val: 80 }, { name: 'NLP', val: 85 }
+                                            { name: 'FRONTEND DEVELOPMENT', val: 95 },
+                                            { name: 'BACKEND DEVELOPMENT', val: 90 },
+                                            { name: 'AIML / DEEP LEARNING', val: 85 },
+                                            { name: 'DSA / ALGORITHMS', val: 80 },
+                                            { name: 'TRANSFORMERS / NLP', val: 85 },
+                                            { name: 'BERT & LLMs', val: 82 },
+                                            { name: 'THREE.JS / WEBGL', val: 75 }
                                         ].map(s => (
                                             <div key={s.name}>
                                                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '1.1rem', marginBottom: '8px' }}>
