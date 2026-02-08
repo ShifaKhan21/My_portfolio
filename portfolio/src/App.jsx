@@ -443,7 +443,7 @@ export default function App() {
 
                             {/* PROJECTS WINDOW */}
                             {windows.projects && (
-                                <Window title="PROJECT_REPOSITORY" icon={Layers} onClose={() => toggleWindow('projects')} initialSize={{ width: '900px', height: '650px' }} isMobile={isMobile}>
+                                <Window title="PROJECT_REPOSITORY" icon={Layers} onClose={() => toggleWindow('projects')} initialSize={{ width: '900px', height: '600px' }} isMobile={isMobile}>
                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                                         {[
                                             {
