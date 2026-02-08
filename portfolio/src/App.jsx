@@ -433,20 +433,20 @@ export default function App() {
                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '30px' }}>
                                         {[
                                             {
-                                                id: '01', title: 'JobEase', tags: ['AI', 'REACT', 'NODE'],
-                                                problem: 'Traditional interview prep lacks personalized, real-time feedback.',
-                                                role: 'Full Stack Web Developer & Model Fine-tuner',
-                                                arch: 'React Frontend <> Node/Express API <> Fine-tuned LLM',
+                                                id: '01', title: 'JobEase', tags: ['AI', 'REACT', 'FIREBASE', 'FLAN-T5'],
+                                                problem: 'Traditional interview prep lacks personalized feedback and adaptive questioning.',
+                                                role: 'Full Stack & AI Engineer: Dataset Curation/Preprocessing, FLAN-T5 Fine-tuning, Firebase Auth.',
+                                                arch: 'React Frontend <> Node/Express <> Fine-tuned FLAN-T5 <> Firebase',
                                                 impact: 'Conducted 50+ adaptive interviews with 90% user satisfaction.',
-                                                github: '#', demo: '#'
+                                                github: 'https://github.com/ShifaKhan21/JobEase', demo: '#'
                                             },
                                             {
-                                                id: '02', title: 'Exeprcut', tags: ['DEV', 'SYSTEM'],
-                                                problem: 'Project execution workflows are often fragmented and inefficient.',
-                                                role: 'Full Stack Web Developer',
-                                                arch: 'Modular Architecture with centralized state management.',
-                                                impact: 'Streamlined execution process, reducing overhead by 30%.',
-                                                github: '#', demo: '#'
+                                                id: '02', title: 'Exeprcut', tags: ['DEV', 'JITSI', 'API'],
+                                                problem: 'Recruiters struggle with manual scheduling and generating candidate-specific questions.',
+                                                role: 'Full Stack Dev: Integrated Jitsi Meet for video calls & LLM API for resume-based questions.',
+                                                arch: 'MERN Stack + Jitsi Meet SDK + Resume Parsing/Question Gen API',
+                                                impact: 'Streamlined interview scheduling and automated technical question generation.',
+                                                github: 'https://github.com/ShifaKhan21/exprecrut', demo: '#'
                                             },
                                             {
                                                 id: '03', title: 'Timetable Generator', tags: ['ALGORITHMS', 'SCHEDULING'],
@@ -454,7 +454,7 @@ export default function App() {
                                                 role: 'Full Stack Web Developer',
                                                 arch: 'Genetic Algorithm / Constraint Satisfaction Solver.',
                                                 impact: 'Generates conflict-free schedules in seconds vs days.',
-                                                github: '#', demo: '#'
+                                                github: 'https://github.com/MohammadM01/timetable', demo: '#'
                                             },
                                         ].map(p => (
                                             <motion.div
