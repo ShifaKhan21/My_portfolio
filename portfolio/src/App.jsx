@@ -270,9 +270,9 @@ const Window = ({ title, icon: Icon, children, onClose, style, initialSize = { w
                 maxHeight: '100vh'
             }}
         >
-            <div style={{ display: 'flex', justifyContent: 'space-between', padding: '15px', background: 'rgba(0, 40, 0, 1)', borderBottom: `2px solid ${THEME.green}`, cursor: actualIsMax ? 'default' : 'grab' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '15px', fontWeight: 'bold', color: 'white', fontSize: actualIsMax ? '1rem' : '1.2rem', letterSpacing: '2px' }}>
-                    {Icon && <Icon size={24} />} <span>{title}</span>
+            <div style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 15px', background: 'rgba(0, 40, 0, 1)', borderBottom: `2px solid ${THEME.green}`, cursor: actualIsMax ? 'default' : 'grab' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontWeight: 'bold', color: 'white', fontSize: actualIsMax ? '0.9rem' : '1.1rem', letterSpacing: '2px' }}>
+                    {Icon && <Icon size={20} />} <span>{title}</span>
                 </div>
                 <div style={{ display: 'flex', gap: '15px' }}>
                     {!isMobile && <Minimize2 size={24} color={THEME.green} />}
@@ -280,7 +280,7 @@ const Window = ({ title, icon: Icon, children, onClose, style, initialSize = { w
                     <X size={24} color="#ff3333" onClick={onClose} style={{ cursor: 'pointer' }} />
                 </div>
             </div>
-            <div style={{ padding: isMobile ? '15px' : '30px', color: '#ccffcc', flex: 1, overflowY: 'auto', fontSize: isMobile ? '1rem' : '1.1rem' }}>
+            <div style={{ padding: isMobile ? '15px' : '25px', color: '#ccffcc', flex: 1, overflowY: 'auto', fontSize: isMobile ? '0.9rem' : '1rem' }}>
                 {children}
             </div>
         </motion.div>
@@ -294,7 +294,7 @@ const DesktopIcon = ({ label, icon: Icon, onClick, color = THEME.green }) => (
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.95 }}
         style={{
-            margin: '30px',
+            margin: '20px',
             display: 'flex', flexDirection: 'column', alignItems: 'center',
             cursor: 'pointer', color: color,
             textShadow: `0 0 10px ${color}`,
@@ -307,15 +307,15 @@ const DesktopIcon = ({ label, icon: Icon, onClick, color = THEME.green }) => (
             }}
             transition={{ duration: 2, repeat: Infinity }}
             style={{
-                width: '100px', height: '100px', borderRadius: '16px', // Larger icons
+                width: '80px', height: '80px', borderRadius: '12px',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                marginBottom: '16px', background: 'rgba(0, 30, 0, 0.8)',
+                marginBottom: '12px', background: 'rgba(0, 30, 0, 0.8)',
                 backdropFilter: 'blur(4px)'
             }}
         >
-            <Icon size={50} />
+            <Icon size={40} />
         </motion.div>
-        <span style={{ fontSize: '1.1rem', fontWeight: 'bold', background: 'rgba(0,0,0,0.9)', padding: '6px 12px', borderRadius: '4px', letterSpacing: '1px' }}>{label}</span>
+        <span style={{ fontSize: '0.9rem', fontWeight: 'bold', background: 'rgba(0,0,0,0.9)', padding: '4px 10px', borderRadius: '4px', letterSpacing: '1px' }}>{label}</span>
     </motion.div>
 );
 
@@ -384,12 +384,12 @@ export default function App() {
                                 {!titleTyped ? (
                                     <TypingText
                                         text="SHIFA KHAN"
-                                        style={{ fontSize: isMobile ? '2.5rem' : '4rem', fontWeight: 'bold', color: 'white', fontFamily: 'Share Tech Mono', lineHeight: 1, margin: 0 }}
+                                        style={{ fontSize: isMobile ? '2rem' : '3.5rem', fontWeight: 'bold', color: 'white', fontFamily: 'Share Tech Mono', lineHeight: 1, margin: 0 }}
                                         speed={100}
                                         onComplete={() => setTitleTyped(true)}
                                     />
                                 ) : (
-                                    <h1 className="glitch-text" data-text="SHIFA KHAN" style={{ fontSize: isMobile ? '2.5rem' : '4rem', fontWeight: 'bold', color: 'white', fontFamily: 'Share Tech Mono', lineHeight: 1, margin: 0 }}>SHIFA KHAN</h1>
+                                    <h1 className="glitch-text" data-text="SHIFA KHAN" style={{ fontSize: isMobile ? '2rem' : '3.5rem', fontWeight: 'bold', color: 'white', fontFamily: 'Share Tech Mono', lineHeight: 1, margin: 0 }}>SHIFA KHAN</h1>
                                 )}
                                 <CyclingTypingText
                                     texts={[
@@ -401,7 +401,7 @@ export default function App() {
                                         "NLP",
                                         "BERT"
                                     ]}
-                                    style={{ fontSize: isMobile ? '1rem' : '1.5rem', color: THEME.green, marginTop: '15px', fontFamily: 'monospace', letterSpacing: '4px', height: '30px', wordBreak: 'break-word' }}
+                                    style={{ fontSize: isMobile ? '0.9rem' : '1.2rem', color: THEME.green, marginTop: '15px', fontFamily: 'monospace', letterSpacing: '4px', height: '30px', wordBreak: 'break-word' }}
                                     speed={80}
                                     pause={2000}
                                 />
@@ -419,17 +419,17 @@ export default function App() {
 
                         {/* WINDOWS */}
                         <AnimatePresence>
-                            {/* IDENTITY WINDOW - BIGGER & CENTERED */}
+                            {/* IDENTITY WINDOW - CENTERED */}
                             {windows.about && (
-                                <Window title="IDENTITY_PROFILE" icon={Code} onClose={() => toggleWindow('about')} initialSize={{ width: '900px', height: '600px' }} isMobile={isMobile}>
-                                    <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: '40px', alignItems: 'center', height: '100%', overflowY: 'auto' }}>
-                                        <div style={{ width: isMobile ? '200px' : '300px', height: isMobile ? '200px' : '300px', border: `4px solid ${THEME.green}`, padding: '10px', boxShadow: `0 0 20px ${THEME.green}`, flexShrink: 0 }}>
+                                <Window title="IDENTITY_PROFILE" icon={Code} onClose={() => toggleWindow('about')} initialSize={{ width: '800px', height: '550px' }} isMobile={isMobile}>
+                                    <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: '30px', alignItems: 'center', height: '100%', overflowY: 'auto' }}>
+                                        <div style={{ width: isMobile ? '180px' : '250px', height: isMobile ? '180px' : '250px', border: `3px solid ${THEME.green}`, padding: '8px', boxShadow: `0 0 15px ${THEME.green}`, flexShrink: 0 }}>
                                             <img src={`./6071185557552827816.jpg`} alt="Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                         </div>
                                         <div style={{ flex: 1, textAlign: isMobile ? 'center' : 'left' }}>
-                                            <h2 className="glitch-text" data-text="SHIFA KHAN" style={{ fontSize: isMobile ? '2rem' : '3.5rem', margin: '0 0 20px 0', color: 'white', fontFamily: 'Share Tech Mono' }}>SHIFA KHAN</h2>
-                                            <p style={{ color: THEME.green, borderBottom: `2px dashed ${THEME.green}`, paddingBottom: '20px', fontSize: isMobile ? '1.2rem' : '1.5rem' }}>Full Stack Developer // AI Engineer</p>
-                                            <div style={{ marginTop: '30px', fontFamily: 'monospace', lineHeight: '2', fontSize: isMobile ? '1rem' : '1.3rem', textAlign: 'left' }}>
+                                            <h2 className="glitch-text" data-text="SHIFA KHAN" style={{ fontSize: isMobile ? '1.8rem' : '3rem', margin: '0 0 15px 0', color: 'white', fontFamily: 'Share Tech Mono' }}>SHIFA KHAN</h2>
+                                            <p style={{ color: THEME.green, borderBottom: `2px dashed ${THEME.green}`, paddingBottom: '15px', fontSize: isMobile ? '1rem' : '1.3rem' }}>Full Stack Developer // AI Engineer</p>
+                                            <div style={{ marginTop: '20px', fontFamily: 'monospace', lineHeight: '1.8', fontSize: isMobile ? '0.9rem' : '1.1rem', textAlign: 'left' }}>
                                                 <div>{'>'} ROLE: FULL STACK WEB DEVELOPER & AI ENGINEER</div>
                                                 <div>{'>'} STATUS: FINAL YEAR ENGINEERING STUDENT</div>
                                                 <div>{'>'} CORE: IT ENGINEERING</div>
@@ -443,8 +443,8 @@ export default function App() {
 
                             {/* PROJECTS WINDOW */}
                             {windows.projects && (
-                                <Window title="PROJECT_REPOSITORY" icon={Layers} onClose={() => toggleWindow('projects')} initialSize={{ width: '1000px', height: '700px' }} isMobile={isMobile}>
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '30px' }}>
+                                <Window title="PROJECT_REPOSITORY" icon={Layers} onClose={() => toggleWindow('projects')} initialSize={{ width: '900px', height: '650px' }} isMobile={isMobile}>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                                         {[
                                             {
                                                 id: '01', title: 'JobEase', tags: ['AI', 'REACT', 'FIREBASE', 'FLAN-T5'],
@@ -534,9 +534,9 @@ export default function App() {
 
                             {/* SKILLS WINDOW */}
                             {windows.skills && (
-                                <Window title="SKILL_SEARCH" icon={Cpu} onClose={() => toggleWindow('skills')} initialSize={{ width: '800px', height: '600px' }} isMobile={isMobile}>
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '25px' }}>
-                                        <h3 style={{ color: 'white', borderBottom: `2px solid ${THEME.green}`, fontSize: '1.5rem', paddingBottom: '10px' }}>{'>'} SYSTEM_DIAGNOSTICS</h3>
+                                <Window title="SKILL_SEARCH" icon={Cpu} onClose={() => toggleWindow('skills')} initialSize={{ width: '700px', height: '550px' }} isMobile={isMobile}>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                                        <h3 style={{ color: 'white', borderBottom: `2px solid ${THEME.green}`, fontSize: '1.3rem', paddingBottom: '8px' }}>{'>'} SYSTEM_DIAGNOSTICS</h3>
                                         {[
                                             { name: 'FRONTEND DEVELOPMENT', val: 95 },
                                             { name: 'BACKEND DEVELOPMENT', val: 90 },
@@ -562,7 +562,7 @@ export default function App() {
 
                             {/* TERMINAL WINDOW */}
                             {windows.terminal && (
-                                <Window title="CMD_TERMINAL" icon={Terminal} onClose={() => toggleWindow('terminal')} initialSize={{ width: '900px', height: '600px' }} isMobile={isMobile}>
+                                <Window title="CMD_TERMINAL" icon={Terminal} onClose={() => toggleWindow('terminal')} initialSize={{ width: '800px', height: '550px' }} isMobile={isMobile}>
                                     <TerminalWindow onClose={() => toggleWindow('terminal')} />
                                 </Window>
                             )}
