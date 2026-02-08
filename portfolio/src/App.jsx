@@ -4,7 +4,7 @@ import { Stars } from '@react-three/drei';
 import Particles from 'react-tsparticles';
 import { loadSlim } from 'tsparticles-slim';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Code, Terminal, Layers, Cpu, Maximize2, Minimize2, X, FileText, Video, Github } from 'lucide-react';
+import { Code, Terminal, Layers, Cpu, Maximize2, Minimize2, X, FileText } from 'lucide-react';
 
 // --- CONFIG ---
 const THEME = {
@@ -239,42 +239,48 @@ const TerminalWindow = ({ onClose }) => {
 };
 
 // --- COMPONENT: DRAGGABLE WINDOW ---
-const Window = ({ title, icon: Icon, children, onClose, style, initialSize = { width: '800px', height: '600px' } }) => {
+const Window = ({ title, icon: Icon, children, onClose, style, initialSize = { width: '800px', height: '600px' }, isMobile }) => {
     const [isMax, setIsMax] = useState(false);
+
+    // Mobile force full screen
+    const actualIsMax = isMobile || isMax;
+
     return (
         <motion.div
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.8, opacity: 0 }}
-            drag
+            drag={!actualIsMax}
             dragMomentum={false}
             style={{
                 position: 'fixed',
-                top: '50%',
-                left: '50%',
-                width: isMax ? '95%' : initialSize.width,
-                height: isMax ? '90%' : initialSize.height,
-                background: 'rgba(0, 10, 0, 0.98)', // Less transparent for readability
-                border: `2px solid ${THEME.green}`, // Thicker border
+                top: actualIsMax ? 0 : '50%',
+                left: actualIsMax ? 0 : '50%',
+                width: actualIsMax ? '100%' : initialSize.width,
+                height: actualIsMax ? '100%' : initialSize.height,
+                background: 'rgba(0, 10, 0, 0.98)',
+                border: actualIsMax ? 'none' : `2px solid ${THEME.green}`,
                 boxShadow: `0 0 30px rgba(0, 255, 65, 0.3)`,
                 zIndex: 100,
                 display: 'flex', flexDirection: 'column',
-                x: '-50%', // Centers element horizontally
-                y: '-50%', // Centers element vertically
-                borderRadius: '8px'
+                x: actualIsMax ? 0 : '-50%',
+                y: actualIsMax ? 0 : '-50%',
+                borderRadius: actualIsMax ? 0 : '8px',
+                maxWidth: '100vw',
+                maxHeight: '100vh'
             }}
         >
-            <div style={{ display: 'flex', justifyContent: 'space-between', padding: '15px', background: 'rgba(0, 40, 0, 1)', borderBottom: `2px solid ${THEME.green}`, cursor: 'grab' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '15px', fontWeight: 'bold', color: 'white', fontSize: '1.2rem', letterSpacing: '2px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', padding: '15px', background: 'rgba(0, 40, 0, 1)', borderBottom: `2px solid ${THEME.green}`, cursor: actualIsMax ? 'default' : 'grab' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '15px', fontWeight: 'bold', color: 'white', fontSize: actualIsMax ? '1rem' : '1.2rem', letterSpacing: '2px' }}>
                     {Icon && <Icon size={24} />} <span>{title}</span>
                 </div>
                 <div style={{ display: 'flex', gap: '15px' }}>
-                    <Minimize2 size={24} color={THEME.green} />
-                    <Maximize2 size={24} color={THEME.green} onClick={() => setIsMax(!isMax)} style={{ cursor: 'pointer' }} />
+                    {!isMobile && <Minimize2 size={24} color={THEME.green} />}
+                    {!isMobile && <Maximize2 size={24} color={THEME.green} onClick={() => setIsMax(!isMax)} style={{ cursor: 'pointer' }} />}
                     <X size={24} color="#ff3333" onClick={onClose} style={{ cursor: 'pointer' }} />
                 </div>
             </div>
-            <div style={{ padding: '30px', color: '#ccffcc', flex: 1, overflowY: 'auto', fontSize: '1.1rem' }}>
+            <div style={{ padding: isMobile ? '15px' : '30px', color: '#ccffcc', flex: 1, overflowY: 'auto', fontSize: isMobile ? '1rem' : '1.1rem' }}>
                 {children}
             </div>
         </motion.div>
@@ -320,6 +326,14 @@ export default function App() {
     const [windows, setWindows] = useState({ about: false, projects: false, skills: false, terminal: false, resume: false });
     const [expandedProject, setExpandedProject] = useState(null);
 
+    // Responsive check
+    const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+    useEffect(() => {
+        const handleResize = () => setIsMobile(window.innerWidth < 768);
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
     const toggleWindow = (key) => setWindows(prev => ({ ...prev, [key]: !prev[key] }));
     const particlesInit = async (main) => await loadSlim(main);
 
@@ -346,14 +360,14 @@ export default function App() {
                         {/* SYSTEM BAR */}
                         <div style={{
                             borderBottom: `2px solid ${THEME.green}`, background: 'rgba(0,0,0,0.95)',
-                            display: 'flex', justifyContent: 'space-between', padding: '12px 30px',
-                            fontSize: '1rem', color: THEME.green, textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 'bold'
+                            display: 'flex', justifyContent: 'space-between', padding: isMobile ? '10px' : '12px 30px',
+                            fontSize: isMobile ? '0.8rem' : '1rem', color: THEME.green, textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 'bold'
                         }}>
-                            <div style={{ display: 'flex', gap: '3rem' }}>
-                                <span>{'>'} SYSTEM: ONLINE</span>
-                                <span>NET: SECURE</span>
+                            <div style={{ display: 'flex', gap: isMobile ? '1rem' : '3rem' }}>
+                                <span>{'>'} SYS: ONLINE</span>
+                                {!isMobile && <span>NET: SECURE</span>}
                             </div>
-                            <div>USR: SHIFA_KHAN [ADMIN]</div>
+                            <div>USR: SHIFA {isMobile ? '' : '[ADMIN]'}</div>
                         </div>
 
                         {/* DESKTOP CONTENT - CENTERED */}
@@ -366,16 +380,16 @@ export default function App() {
                             gap: '40px'
                         }}>
                             {/* TYPING HERO TEXT */}
-                            <div style={{ textAlign: 'center', marginBottom: '20px', minHeight: '80px' }}>
+                            <div style={{ textAlign: 'center', marginBottom: '20px', minHeight: '80px', padding: '0 20px' }}>
                                 {!titleTyped ? (
                                     <TypingText
                                         text="SHIFA KHAN"
-                                        style={{ fontSize: '4rem', fontWeight: 'bold', color: 'white', fontFamily: 'Share Tech Mono', lineHeight: 1, margin: 0 }}
+                                        style={{ fontSize: isMobile ? '2.5rem' : '4rem', fontWeight: 'bold', color: 'white', fontFamily: 'Share Tech Mono', lineHeight: 1, margin: 0 }}
                                         speed={100}
                                         onComplete={() => setTitleTyped(true)}
                                     />
                                 ) : (
-                                    <h1 className="glitch-text" data-text="SHIFA KHAN" style={{ fontSize: '4rem', fontWeight: 'bold', color: 'white', fontFamily: 'Share Tech Mono', lineHeight: 1, margin: 0 }}>SHIFA KHAN</h1>
+                                    <h1 className="glitch-text" data-text="SHIFA KHAN" style={{ fontSize: isMobile ? '2.5rem' : '4rem', fontWeight: 'bold', color: 'white', fontFamily: 'Share Tech Mono', lineHeight: 1, margin: 0 }}>SHIFA KHAN</h1>
                                 )}
                                 <CyclingTypingText
                                     texts={[
@@ -387,14 +401,14 @@ export default function App() {
                                         "NLP",
                                         "BERT"
                                     ]}
-                                    style={{ fontSize: '1.5rem', color: THEME.green, marginTop: '15px', fontFamily: 'monospace', letterSpacing: '4px', height: '30px' }}
+                                    style={{ fontSize: isMobile ? '1rem' : '1.5rem', color: THEME.green, marginTop: '15px', fontFamily: 'monospace', letterSpacing: '4px', height: '30px', wordBreak: 'break-word' }}
                                     speed={80}
                                     pause={2000}
                                 />
                             </div>
 
                             {/* ICONS */}
-                            <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '40px' }}>
+                            <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: isMobile ? '20px' : '40px' }}>
                                 <DesktopIcon label="IDENTITY" icon={Code} onClick={() => toggleWindow('about')} />
                                 <DesktopIcon label="PROJECTS" icon={Layers} onClick={() => toggleWindow('projects')} />
                                 <DesktopIcon label="SKILLS" icon={Cpu} onClick={() => toggleWindow('skills')} />
@@ -407,15 +421,15 @@ export default function App() {
                         <AnimatePresence>
                             {/* IDENTITY WINDOW - BIGGER & CENTERED */}
                             {windows.about && (
-                                <Window title="IDENTITY_PROFILE" icon={Code} onClose={() => toggleWindow('about')} initialSize={{ width: '900px', height: '600px' }}>
-                                    <div style={{ display: 'flex', gap: '40px', alignItems: 'center', height: '100%' }}>
-                                        <div style={{ width: '300px', height: '300px', border: `4px solid ${THEME.green}`, padding: '10px', boxShadow: `0 0 20px ${THEME.green}` }}>
+                                <Window title="IDENTITY_PROFILE" icon={Code} onClose={() => toggleWindow('about')} initialSize={{ width: '900px', height: '600px' }} isMobile={isMobile}>
+                                    <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: '40px', alignItems: 'center', height: '100%', overflowY: 'auto' }}>
+                                        <div style={{ width: isMobile ? '200px' : '300px', height: isMobile ? '200px' : '300px', border: `4px solid ${THEME.green}`, padding: '10px', boxShadow: `0 0 20px ${THEME.green}`, flexShrink: 0 }}>
                                             <img src={`./6071185557552827816.jpg`} alt="Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                         </div>
-                                        <div style={{ flex: 1 }}>
-                                            <h2 className="glitch-text" data-text="SHIFA KHAN" style={{ fontSize: '3.5rem', margin: '0 0 20px 0', color: 'white', fontFamily: 'Share Tech Mono' }}>SHIFA KHAN</h2>
-                                            <p style={{ color: THEME.green, borderBottom: `2px dashed ${THEME.green}`, paddingBottom: '20px', fontSize: '1.5rem' }}>Full Stack Developer // AI Engineer</p>
-                                            <div style={{ marginTop: '30px', fontFamily: 'monospace', lineHeight: '2', fontSize: '1.3rem' }}>
+                                        <div style={{ flex: 1, textAlign: isMobile ? 'center' : 'left' }}>
+                                            <h2 className="glitch-text" data-text="SHIFA KHAN" style={{ fontSize: isMobile ? '2rem' : '3.5rem', margin: '0 0 20px 0', color: 'white', fontFamily: 'Share Tech Mono' }}>SHIFA KHAN</h2>
+                                            <p style={{ color: THEME.green, borderBottom: `2px dashed ${THEME.green}`, paddingBottom: '20px', fontSize: isMobile ? '1.2rem' : '1.5rem' }}>Full Stack Developer // AI Engineer</p>
+                                            <div style={{ marginTop: '30px', fontFamily: 'monospace', lineHeight: '2', fontSize: isMobile ? '1rem' : '1.3rem', textAlign: 'left' }}>
                                                 <div>{'>'} ROLE: FULL STACK WEB DEVELOPER & AI ENGINEER</div>
                                                 <div>{'>'} STATUS: FINAL YEAR ENGINEERING STUDENT</div>
                                                 <div>{'>'} CORE: IT ENGINEERING</div>
@@ -429,7 +443,7 @@ export default function App() {
 
                             {/* PROJECTS WINDOW */}
                             {windows.projects && (
-                                <Window title="PROJECT_REPOSITORY" icon={Layers} onClose={() => toggleWindow('projects')} initialSize={{ width: '1000px', height: '700px' }}>
+                                <Window title="PROJECT_REPOSITORY" icon={Layers} onClose={() => toggleWindow('projects')} initialSize={{ width: '1000px', height: '700px' }} isMobile={isMobile}>
                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '30px' }}>
                                         {[
                                             {
@@ -520,7 +534,7 @@ export default function App() {
 
                             {/* SKILLS WINDOW */}
                             {windows.skills && (
-                                <Window title="SKILL_SEARCH" icon={Cpu} onClose={() => toggleWindow('skills')} initialSize={{ width: '800px', height: '600px' }}>
+                                <Window title="SKILL_SEARCH" icon={Cpu} onClose={() => toggleWindow('skills')} initialSize={{ width: '800px', height: '600px' }} isMobile={isMobile}>
                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '25px' }}>
                                         <h3 style={{ color: 'white', borderBottom: `2px solid ${THEME.green}`, fontSize: '1.5rem', paddingBottom: '10px' }}>{'>'} SYSTEM_DIAGNOSTICS</h3>
                                         {[
@@ -548,14 +562,14 @@ export default function App() {
 
                             {/* TERMINAL WINDOW */}
                             {windows.terminal && (
-                                <Window title="CMD_TERMINAL" icon={Terminal} onClose={() => toggleWindow('terminal')} initialSize={{ width: '900px', height: '600px' }}>
+                                <Window title="CMD_TERMINAL" icon={Terminal} onClose={() => toggleWindow('terminal')} initialSize={{ width: '900px', height: '600px' }} isMobile={isMobile}>
                                     <TerminalWindow onClose={() => toggleWindow('terminal')} />
                                 </Window>
                             )}
 
                             {/* RESUME WINDOW */}
                             {windows.resume && (
-                                <Window title="RESUME_DATA" icon={FileText} onClose={() => toggleWindow('resume')} initialSize={{ width: '500px', height: '400px' }}>
+                                <Window title="RESUME_DATA" icon={FileText} onClose={() => toggleWindow('resume')} initialSize={{ width: '500px', height: '400px' }} isMobile={isMobile}>
                                     <div style={{ textAlign: 'center', padding: '30px' }}>
                                         <FileText size={80} color={THEME.green} style={{ marginBottom: '30px' }} />
                                         <h3 style={{ color: 'white', margin: '0 0 20px 0', fontSize: '2rem' }}>RESUME_FILE.PDF</h3>
