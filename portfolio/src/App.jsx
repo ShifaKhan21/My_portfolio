@@ -424,7 +424,7 @@ export default function App() {
                                 <Window title="IDENTITY_PROFILE" icon={Code} onClose={() => toggleWindow('about')} initialSize={{ width: '800px', height: '550px' }} isMobile={isMobile}>
                                     <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: '30px', alignItems: 'center', height: '100%', overflowY: 'auto' }}>
                                         <div style={{ width: isMobile ? '180px' : '250px', height: isMobile ? '180px' : '250px', border: `3px solid ${THEME.green}`, padding: '8px', boxShadow: `0 0 15px ${THEME.green}`, flexShrink: 0 }}>
-                                            <img src={`./6071185557552827816.jpg`} alt="Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                            <img src="/shifa_avatar.jpg" alt="Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                         </div>
                                         <div style={{ flex: 1, textAlign: isMobile ? 'center' : 'left' }}>
                                             <h2 className="glitch-text" data-text="SHIFA KHAN" style={{ fontSize: isMobile ? '1.8rem' : '3rem', margin: '0 0 15px 0', color: 'white', fontFamily: 'Share Tech Mono' }}>SHIFA KHAN</h2>
